@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import WebSocket
+@_exported import WebSocket
 @_exported import HTTP
 
 public struct Server: Responder, Middleware {
