@@ -1,4 +1,4 @@
-# WebSocket
+# WebSocketServer
 
 [![Swift][swift-badge]][swift-url]
 [![Zewo][zewo-badge]][zewo-url]
@@ -11,10 +11,10 @@
 ## Usage
 
 ```swift
-import WebSocket
+import WebSocketServer
 import HTTPServer
 
-let webSocketServer = WebSocket.Server { webSocket in
+let webSocketServer = WebSocketServer.Server { webSocket in
     print("connected")
 
     webSocket.onBinary { data in
@@ -28,7 +28,7 @@ let webSocketServer = WebSocket.Server { webSocket in
     }
 }
 
-try HTTPServer.Server(address: "127.0.0.1", port: 8180, responder: webSocketServer).start()
+try HTTPServer.Server(webSocketServer).start()
 ```
 
 ## Installation
@@ -38,7 +38,7 @@ import PackageDescription
 
 let package = Package(
     dependencies: [
-        .Package(url: "https://github.com/Zewo/WebSocket.git", majorVersion: 0, minor: 6),
+        .Package(url: "https://github.com/Zewo/WebSocketServer.git", majorVersion: 0, minor: 1),
     ]
 )
 ```
@@ -68,7 +68,7 @@ This project is released under the MIT license. See [LICENSE](LICENSE) for detai
 [slack-image]: http://s13.postimg.org/ybwy92ktf/Slack.png
 [slack-badge]: https://zewo-slackin.herokuapp.com/badge.svg
 [slack-url]: http://slack.zewo.io
-[travis-badge]: https://travis-ci.org/Zewo/WebSocket.svg?branch=master
-[travis-url]: https://travis-ci.org/Zewo/WebSocket
-[codebeat-badge]: https://codebeat.co/badges/7b271ac4-f447-45a5-8cd0-f0f4c2e57690
-[codebeat-url]: https://codebeat.co/projects/github-com-zewo-websocket
+[travis-badge]: https://travis-ci.org/Zewo/WebSocketServer.svg?branch=master
+[travis-url]: https://travis-ci.org/Zewo/WebSocketServer
+[codebeat-badge]: https://codebeat.co/badges/cabe1795-6f5e-4fe6-85ab-5b68f1596efd
+[codebeat-url]: https://codebeat.co/projects/github-com-zewo-websocketserver

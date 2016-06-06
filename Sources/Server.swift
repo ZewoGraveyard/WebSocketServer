@@ -22,82 +22,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+@_exported import WebSocket
 @_exported import HTTP
 
 public struct Server: Responder, Middleware {
-    
-    public enum Error: ErrorProtocol {
-        case NoResponse
+    private let didConnect: (WebSocket) throws -> Void
+
+    public init(_ didConnect: (WebSocket) throws -> Void) {
+        self.didConnect = didConnect
     }
-    
-    private let onConnect: (Socket) throws -> Void
-    
-    public init(onConnect: (Socket) throws -> Void) {
-        self.onConnect =  onConnect
-    }
-    
-    // MARK: - MiddlewareType
-    
+
     public func respond(to request: Request, chainingTo chain: Responder) throws -> Response {
         guard request.isWebSocket && request.webSocketVersion == "13", let key = request.webSocketKey else {
             return try chain.respond(to: request)
         }
-        
-        guard let accept = Socket.accept(key) else {
+
+        guard let accept = WebSocket.accept(key) else {
             return Response(status: .internalServerError)
         }
-        
+
         let headers: Headers = [
             "Connection": "Upgrade",
             "Upgrade": "websocket",
             "Sec-WebSocket-Accept": Header([accept])
         ]
-        
-        var _response: Response?
+
         let response = Response(status: .switchingProtocols, headers: headers) { _, stream in
-            guard let response = _response else {
-                throw Error.NoResponse
-            }
-            
-            let webSocket = Socket(stream: stream, mode: .Server, request: request, response: response)
-            try self.onConnect(webSocket)
-            try webSocket.loop()
+            let webSocket = WebSocket(stream: stream, mode: .server)
+            try self.didConnect(webSocket)
+            try webSocket.start()
         }
-        _response = response
-        
+
         return response
     }
-    
-    // MARK: - ResponderType
-    
+
     public func respond(to request: Request) throws -> Response {
-        return try respond(to: request, chainingTo: self)
+        let badRequest = BasicResponder { _ in
+            throw ClientError.badRequest
+        }
+
+        return try respond(to: request, chainingTo: badRequest)
     }
-    
-    // MARK: - ChainType
-    
-    public func proceed(request: Request) throws -> Response {
-        return Response(status: .badRequest)
-    }
-    
 }
 
-public extension Message {
-    
+public extension Request {
     public var webSocketVersion: String? {
         return headers["Sec-Websocket-Version"].first
     }
-    
+
     public var webSocketKey: String? {
         return headers["Sec-Websocket-Key"].first
     }
-    
+
     public var webSocketAccept: String? {
         return headers["Sec-WebSocket-Accept"].first
     }
-    
+
     public var isWebSocket: Bool {
         return connection.first?.lowercased() == "upgrade" && upgrade.first?.lowercased() == "websocket"
     }
-    
 }
