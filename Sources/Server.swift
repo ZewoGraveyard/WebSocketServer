@@ -26,9 +26,9 @@
 @_exported import HTTP
 
 public struct Server: Responder, Middleware {
-    private let didConnect: (WebSocket) throws -> Void
+    private let didConnect: (WebSocket, Request) throws -> Void
 
-    public init(_ didConnect: (WebSocket) throws -> Void) {
+    public init(_ didConnect: (WebSocket, Request) throws -> Void) {
         self.didConnect = didConnect
     }
 
@@ -47,9 +47,9 @@ public struct Server: Responder, Middleware {
             "Sec-WebSocket-Accept": Header([accept])
         ]
 
-        let response = Response(status: .switchingProtocols, headers: headers) { _, stream in
+        let response = Response(status: .switchingProtocols, headers: headers) { request, stream in
             let webSocket = WebSocket(stream: stream, mode: .server)
-            try self.didConnect(webSocket)
+            try self.didConnect(webSocket, request)
             try webSocket.start()
         }
 
