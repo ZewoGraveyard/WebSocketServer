@@ -35,7 +35,6 @@ try Server(responder: wsServer).start()
 It can also be created directly from a request:
 
 ```swift
-import Router
 import WebSocketServer
 import HTTPServer
 
