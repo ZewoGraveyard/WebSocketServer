@@ -25,16 +25,16 @@
 @_exported import WebSocket
 @_exported import HTTP
 
-public struct Server: Responder, Middleware {
-    private let didConnect: (WebSocket, Request) throws -> Void
+public struct WebSocketServer: Responder, Middleware {
+    private let didConnect: (Request, WebSocket) throws -> Void
 
-    public init(_ didConnect: (WebSocket, Request) throws -> Void) {
+    public init(_ didConnect: (Request, WebSocket) throws -> Void) {
         self.didConnect = didConnect
     }
 
-    public func respond(to request: Request, chainingTo chain: Responder) throws -> Response {
+    public func respond(to request: Request, chainingTo next: Responder) throws -> Response {
         guard request.isWebSocket && request.webSocketVersion == "13", let key = request.webSocketKey else {
-            return try chain.respond(to: request)
+            return try next.respond(to: request)
         }
 
         guard let accept = WebSocket.accept(key) else {
@@ -49,7 +49,7 @@ public struct Server: Responder, Middleware {
 
         let response = Response(status: .switchingProtocols, headers: headers) { request, stream in
             let webSocket = WebSocket(stream: stream, mode: .server)
-            try self.didConnect(webSocket, request)
+            try self.didConnect(request, webSocket)
             try webSocket.start()
         }
 
@@ -62,6 +62,12 @@ public struct Server: Responder, Middleware {
         }
 
         return try respond(to: request, chainingTo: badRequest)
+    }
+}
+
+public extension Request {
+    public func webSocket(didConnect: (Request, WebSocket) -> ()) throws -> Response {
+        return try WebSocketServer(didConnect).respond(to: self)
     }
 }
 
