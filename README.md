@@ -8,6 +8,22 @@
 [![Travis][travis-badge]][travis-url]
 [![Codebeat][codebeat-badge]][codebeat-url]
 
+## Overview
+
+**WebSocketServer** is an [S4-Compatible](https://github.com/open-swift/s4) [`Responder`](https://github.com/open-swift/S4/blob/master/Sources/Responder.swift) and [`Middleware`](https://github.com/open-swift/S4/blob/master/Sources/Middleware.swift) that establishes a WebSocket connection for each request.
+
+## Installation
+
+```swift
+import PackageDescription
+
+let package = Package(
+    dependencies: [
+        .Package(url: "https://github.com/Zewo/WebSocketServer.git", majorVersion: 0, minor: 7),
+    ]
+)
+```
+
 ## Usage
 
 `WebSocketServer` can be used as a responder or a middleware:
@@ -52,18 +68,6 @@ try Server { request in
         }
     }
 }.start()
-```
-
-## Installation
-
-```swift
-import PackageDescription
-
-let package = Package(
-    dependencies: [
-        .Package(url: "https://github.com/Zewo/WebSocketServer.git", majorVersion: 0, minor: 7),
-    ]
-)
 ```
 
 ## Support
